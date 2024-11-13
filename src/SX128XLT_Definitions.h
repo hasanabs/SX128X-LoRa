@@ -405,6 +405,7 @@ const double CH_freq[] = {0E6,
 #define ReliableTimeout 0x04      // bit number set in _ReliableErrors when there is a timeout error
 #define SegmentSequenceError 0x05 // bit number set in _ReliableErrors when there is a segment sequence error
 #define FileError 0x06            // bit number set in _ReliableErrors when there ia a file (SD) error
+#define ReliableAddrError 0x07    // bit number set in _ReliableErrors when there is intended Address is incorrect
 
 // These are the bit numbers which when set indicate reliable status flags, variable _ReliableFlags
 #define ReliableACKSent 0x00     // bit number set in _ReliableFlags when there is a ACK sent

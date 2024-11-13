@@ -38,9 +38,11 @@ CRCCCITTSX	KEYWORD2
 CRCCCITT	KEYWORD2
 printSXBufferASCII	KEYWORD2
 receiveAddressed	KEYWORD2
+destAddr	KEYWORD2
 getByteSXBuffer	KEYWORD2
 startWriteSXBuffer	KEYWORD2
 transmitAddressed	KEYWORD2
+srcAddr	KEYWORD2
 startReadSXBuffer	KEYWORD2
 endReadSXBuffer	KEYWORD2
 readBuffer	KEYWORD2
