@@ -1965,6 +1965,7 @@ void SX128XLT::setRx(uint16_t timeout)
   buffer[1] = (uint8_t)((timeout >> 8) & 0x00FF);
   buffer[2] = (uint8_t)(timeout & 0x00FF);
   writeCommand(RADIO_SET_RX, buffer, 3);
+  delayMicroseconds(500); // give a time for the IC to clear the IRQ flags and set the period
 }
 
 void SX128XLT::setPeriodBase(uint8_t value)
@@ -3268,6 +3269,7 @@ uint8_t SX128XLT::receiveRanging(uint32_t address, uint16_t timeout, int8_t txpo
   Serial.println(F("receiveRanging()"));
 #endif
 
+  uint32_t TimeOut = millis() + timeout;
   setTxParams(txpower, RADIO_RAMP_02_US);
   setRangingSlaveAddress(address);
   setDioIrqParams(IRQ_RADIO_ALL, (IRQ_RANGING_SLAVE_RESPONSE_DONE + IRQ_RANGING_SLAVE_REQUEST_DISCARDED + IRQ_HEADER_ERROR), 0, 0);
@@ -3278,7 +3280,7 @@ uint8_t SX128XLT::receiveRanging(uint32_t address, uint16_t timeout, int8_t txpo
     return NO_WAIT; // not wait requested so no packet length to pass
   }
 
-  while (!digitalRead(_RXDonePin))
+  while (!digitalRead(_RXDonePin) && TimeOut - millis() > 0)
     ;
 
   setMode(MODE_STDBY_RC); // ensure to stop further packet reception
