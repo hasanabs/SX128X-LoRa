@@ -41,6 +41,8 @@ public:
   void setDioIrqParams(uint16_t irqMask, uint16_t dio1Mask, uint16_t dio2Mask, uint16_t dio3Mask);
   void setHighSensitivity();
   void setLowPowerRX();
+  void setCadParam(uint8_t LoRa_Cad_Symbol);
+  bool setCad(uint16_t timeout);
   void printModemSettings();
   void printDevice();
   uint32_t getFreqInt();

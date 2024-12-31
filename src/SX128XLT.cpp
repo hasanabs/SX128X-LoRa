@@ -912,6 +912,35 @@ void SX128XLT::setLowPowerRX()
   writeRegister(REG_LNA_REGIME, (readRegister(REG_LNA_REGIME) & 0x3F));
 }
 
+void SX128XLT::setCadParam(uint8_t LoRa_Cad_Symbol)
+{
+#ifdef SX128XDEBUG
+  Serial.println(F("setCadParam()"));
+#endif
+  writeCommand(RADIO_SET_CADPARAMS, &LoRa_Cad_Symbol, 1);
+}
+
+bool SX128XLT::setCad(uint16_t timeout)
+{
+#ifdef SX128XDEBUG
+  Serial.println(F("setCad()"));
+#endif
+  uint32_t TimeOut = millis() + timeout;
+  writeCommand(RADIO_SET_CAD, 0, 0);
+  setDioIrqParams(IRQ_RADIO_ALL, (IRQ_CAD_DONE), 0, 0);
+  while (!digitalRead(_RXDonePin) && TimeOut - millis() > 0)
+    ;
+
+  if (readIrqStatus() & IRQ_CAD_ACTIVITY_DETECTED)
+  {
+    return true;
+  }
+  else
+  {
+    return false; // so we can check for packet having enough buffer space
+  }
+}
+
 void SX128XLT::printModemSettings()
 {
   // modified November 2021 to provide more details on FLRC
