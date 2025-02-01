@@ -189,6 +189,10 @@ transmitReliable	KEYWORD2
 receiveReliable	KEYWORD2
 transmitReliableAutoACK	KEYWORD2
 receiveReliableAutoACK	KEYWORD2
+transmitReliable_addr    KEYWORD2
+receiveReliable_addr	KEYWORD2
+transmitReliableAutoACK_addr    KEYWORD2
+receiveReliableAutoACK_addr	KEYWORD2
 transmitSXReliable	KEYWORD2
 transmitSXReliableAutoACK	KEYWORD2
 receiveSXReliable	KEYWORD2

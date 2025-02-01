@@ -4244,6 +4244,95 @@ uint8_t SX128XLT::sendReliableACK(uint8_t *txbuffer, uint8_t size, uint16_t netw
   return _TXPacketL; // TX OK so return TXpacket length
 }
 
+uint8_t SX128XLT::transmitReliable_addr(uint8_t *txbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint16_t srcAddr, uint32_t txtimeout, int8_t txpower, uint8_t wait)
+{
+#ifdef SX128XDEBUGRELIABLE
+  Serial.println(F(" {RELIABLE} transmitReliable_addr() "));
+  Serial.print(F(" {RELIABLE} _ReliableConfig "));
+  Serial.println(_ReliableConfig, HEX);
+  Serial.print(F(" {RELIABLE} Payload length "));
+  Serial.println(size);
+#endif
+
+  uint8_t index, tempdata;
+  uint16_t payloadcrc;
+
+  _ReliableErrors = 0;
+  _ReliableFlags = 0;
+
+  if (size > 247) // 255 - (networkID + destAddr + srcAddr + payloadcrc)
+  {
+    bitSet(_ReliableErrors, ReliableSizeError);
+    return 0;
+  }
+
+  setMode(MODE_STDBY_RC);
+  checkBusy();
+  _TXPacketL = size + 8; // Extra 8 bytes for payload header
+
+  if (bitRead(_ReliableConfig, NoReliableCRC))
+  {
+    payloadcrc = 0;
+  }
+  else
+  {
+    payloadcrc = CRCCCITT(txbuffer, size, 0xFFFF);
+  }
+
+  checkBusy();
+
+#ifdef USE_SPI_TRANSACTION
+  SPI.beginTransaction(SPISettings(LTspeedMaximum, LTdataOrder, LTdataMode));
+#endif
+
+  digitalWrite(_NSS, LOW);
+  SPI.transfer(RADIO_WRITE_BUFFER);
+  SPI.transfer(0);
+
+  for (index = 0; index < size; index++)
+  {
+    tempdata = txbuffer[index];
+    SPI.transfer(tempdata);
+  }
+
+  SPI.transfer(lowByte(networkID));
+  SPI.transfer(highByte(networkID));
+  SPI.transfer(lowByte(destAddr));
+  SPI.transfer(highByte(destAddr));
+  SPI.transfer(lowByte(srcAddr));
+  SPI.transfer(highByte(srcAddr));
+  SPI.transfer(lowByte(payloadcrc));
+  SPI.transfer(highByte(payloadcrc));
+
+  digitalWrite(_NSS, HIGH);
+
+#ifdef USE_SPI_TRANSACTION
+  SPI.endTransaction();
+#endif
+
+  setPayloadLength(_TXPacketL);
+  setTxParams(txpower, RAMP_TIME);
+  setDioIrqParams(IRQ_RADIO_ALL, (IRQ_TX_DONE + IRQ_RX_TX_TIMEOUT), 0, 0);
+  setTx(txtimeout);
+
+  if (!wait)
+  {
+    return _TXPacketL;
+  }
+
+  while (!digitalRead(_TXDonePin))
+    ;
+
+  setMode(MODE_STDBY_RC);
+
+  if (readIrqStatus() & IRQ_RX_TX_TIMEOUT)
+  {
+    return 0;
+  }
+
+  return _TXPacketL;
+}
+
 uint8_t SX128XLT::transmitReliableAutoACK_addr(uint8_t *txbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint16_t srcAddr, uint32_t acktimeout, uint32_t txtimeout, int8_t txpower, uint8_t wait)
 {
 #ifdef SX128XDEBUGRELIABLE
@@ -4386,6 +4475,130 @@ uint8_t SX128XLT::waitReliableACK_addr(uint16_t networkID, uint16_t destAddr, ui
 
   bitSet(_ReliableErrors, ReliableACKError);
   return 0;
+}
+
+uint8_t SX128XLT::receiveReliable_addr(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, int8_t txpower, uint32_t rxtimeout, uint8_t wait, uint16_t *srcAddr)
+{
+#ifdef SX128XDEBUGRELIABLE
+  Serial.println();
+  Serial.println(F(" {RELIABLE} receiveReliable_addr()"));
+  Serial.print(F(" {RELIABLE} _ReliableConfig "));
+  Serial.println(_ReliableConfig, HEX);
+#endif
+
+  uint16_t payloadcrc = 0, RXcrc, RXnetworkID, RXdestAddr, RXsrcAddr;
+  uint8_t regdataL, regdataH, index;
+  uint8_t buffer[2];
+
+  _ReliableErrors = 0;
+  _ReliableFlags = 0;
+
+  if (size > 247)
+  {
+    bitSet(_ReliableErrors, ReliableSizeError);
+    return 0;
+  }
+
+  setMode(MODE_STDBY_RC);
+  setDioIrqParams(IRQ_RADIO_ALL, (IRQ_RX_DONE + IRQ_RX_TX_TIMEOUT + IRQ_HEADER_ERROR), 0, 0);
+  setRx(rxtimeout);
+
+  if (!wait)
+  {
+    return 0;
+  }
+
+  while (!digitalRead(_RXDonePin))
+    ; // Wait for packet
+  setMode(MODE_STDBY_RC);
+
+  if (readIrqStatus() & (IRQ_HEADER_ERROR + IRQ_CRC_ERROR + IRQ_RX_TX_TIMEOUT + IRQ_SYNCWORD_ERROR))
+  {
+    return 0;
+  }
+
+  readCommand(RADIO_GET_RXBUFFERSTATUS, buffer, 2);
+  _RXPacketL = buffer[0];
+
+  if (_RXPacketL < 8)
+  {
+    bitSet(_ReliableErrors, ReliableSizeError);
+    return 0;
+  }
+
+  if ((_RXPacketL - 8) > size)
+  {
+    bitSet(_ReliableErrors, ReliableSizeError);
+    return 0;
+  }
+
+  checkBusy();
+
+#ifdef USE_SPI_TRANSACTION
+  SPI.beginTransaction(SPISettings(LTspeedMaximum, LTdataOrder, LTdataMode));
+#endif
+
+  digitalWrite(_NSS, LOW);
+  SPI.transfer(RADIO_READ_BUFFER);
+  SPI.transfer(0);
+  SPI.transfer(0xFF);
+
+  for (index = 0; index < (_RXPacketL - 8); index++)
+  {
+    regdataL = SPI.transfer(0);
+    rxbuffer[index] = regdataL;
+  }
+
+  regdataL = SPI.transfer(0);
+  regdataH = SPI.transfer(0);
+  RXnetworkID = ((uint16_t)regdataH << 8) + regdataL;
+  regdataL = SPI.transfer(0);
+  regdataH = SPI.transfer(0);
+  RXdestAddr = ((uint16_t)regdataH << 8) + regdataL;
+  regdataL = SPI.transfer(0);
+  regdataH = SPI.transfer(0);
+  RXsrcAddr = ((uint16_t)regdataH << 8) + regdataL;
+  regdataL = SPI.transfer(0);
+  regdataH = SPI.transfer(0);
+  RXcrc = ((uint16_t)regdataH << 8) + regdataL;
+
+  if (srcAddr)
+  { // If the argument of srcAddr is available, pass the received Source address
+    *srcAddr = RXsrcAddr;
+  }
+
+  digitalWrite(_NSS, HIGH);
+
+#ifdef USE_SPI_TRANSACTION
+  SPI.endTransaction();
+#endif
+
+  // Validate the networkID
+  if (RXnetworkID != networkID)
+  {
+    bitSet(_ReliableErrors, ReliableIDError);
+    return 0;
+  }
+
+  // Validate the Destination address
+  if (RXdestAddr != destAddr)
+  {
+    bitSet(_ReliableErrors, ReliableAddrError);
+    return 0;
+  }
+
+  // Validate CRC
+  if (!bitRead(_ReliableConfig, NoReliableCRC))
+  {
+    payloadcrc = CRCCCITT(rxbuffer, (_RXPacketL - 8), 0xFFFF);
+    if (payloadcrc != RXcrc)
+    {
+      bitSet(_ReliableErrors, ReliableCRCError);
+      return 0;
+    }
+  }
+
+  return _RXPacketL; // Return the packet length
 }
 
 uint8_t SX128XLT::receiveReliableAutoACK_addr(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint32_t ackdelay, int8_t txpower, uint32_t rxtimeout, uint8_t wait, uint16_t *srcAddr)
