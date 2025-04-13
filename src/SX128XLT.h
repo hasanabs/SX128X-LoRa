@@ -158,7 +158,7 @@ public:
   uint8_t receiveReliableAutoACK(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint32_t ackdelay, int8_t txpower, uint32_t rxtimeout, uint8_t wait);
 
   uint8_t transmitReliable_addr(uint8_t *txbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint16_t srcAddr, uint32_t txtimeout, int8_t txpower, uint8_t wait);
-  uint8_t receiveReliable_addr(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, int8_t txpower, uint32_t rxtimeout, uint8_t wait, uint16_t *srcAddr = nullptr);
+  uint8_t receiveReliable_addr(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint32_t rxtimeout, uint8_t wait, uint16_t *srcAddr = nullptr);
   uint8_t transmitReliableAutoACK_addr(uint8_t *txbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint16_t srcAddr, uint32_t acktimeout, uint32_t txtimeout, int8_t txpower, uint8_t wait);
   uint8_t receiveReliableAutoACK_addr(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint32_t ackdelay, int8_t txpower, uint32_t rxtimeout, uint8_t wait, uint16_t *srcAddr = nullptr);
 

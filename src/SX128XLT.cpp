@@ -4477,7 +4477,7 @@ uint8_t SX128XLT::waitReliableACK_addr(uint16_t networkID, uint16_t destAddr, ui
   return 0;
 }
 
-uint8_t SX128XLT::receiveReliable_addr(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, int8_t txpower, uint32_t rxtimeout, uint8_t wait, uint16_t *srcAddr)
+uint8_t SX128XLT::receiveReliable_addr(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint32_t rxtimeout, uint8_t wait, uint16_t *srcAddr)
 {
 #ifdef SX128XDEBUGRELIABLE
   Serial.println();
