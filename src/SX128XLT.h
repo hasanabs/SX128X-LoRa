@@ -137,6 +137,7 @@ public:
   void setRangingMasterAddress(uint32_t address);
   void setRangingCalibration(uint16_t cal);
   void setRangingRole(uint8_t role);
+  void setAdvancedRanging(uint8_t status);
   double getRangingDistance(uint8_t resultType, int32_t regval, float adjust);
   uint32_t getRangingResultRegValue(uint8_t resultType);
   int32_t complement2(uint32_t num, uint8_t bitCnt);
@@ -144,7 +145,9 @@ public:
   bool transmitRanging(uint32_t address, uint16_t timeout, int8_t txpower, uint8_t wait);
   uint8_t receiveRanging(uint32_t address, uint16_t timeout, int8_t txpower, uint8_t wait);
   uint8_t receiveRanging(uint32_t address, uint8_t bits, uint16_t timeout, int8_t txpower, uint8_t wait);
+  uint8_t receiveAdvancedRanging(uint16_t timeout, bool wait);
   uint16_t lookupCalibrationValue(uint8_t spreadingfactor, uint8_t bandwidth);
+  float lookupFeiFactor(uint8_t spreadingfactor, uint8_t bandwidth);
   uint16_t getSetCalibrationValue();
   int16_t getRangingRSSI();
 
@@ -253,6 +256,7 @@ private:
   int8_t savedTXPower;
   uint16_t savedCalibration;
   uint32_t savedFrequencyReg;
+  float savedFreqGrad;
 
   uint8_t _ReliableErrors; // Reliable status byte
   uint8_t _ReliableFlags;  // Reliable flags byte

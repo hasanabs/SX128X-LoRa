@@ -82,6 +82,7 @@
 #define IRQ_TX_TIMEOUT 0x4000
 #define IRQ_RX_TIMEOUT 0x4000
 #define IRQ_PREAMBLE_DETECTED 0x8000
+#define IRQ_ADVANCED_RANGING_DONE 0x8000
 #define IRQ_RADIO_ALL 0xFFFF
 
 //*************************************************************
@@ -118,6 +119,7 @@
 #define RADIO_SET_UARTSPEED 0x9D
 #define RADIO_SET_AUTOFS 0x9E
 #define RADIO_SET_RANGING_ROLE 0xA3
+#define RADIO_SET_ADVANCED_RANGING 0x9A
 #define RADIO_GET_STATUS 0xC0
 #define RADIO_SET_FS 0xC1
 #define RADIO_SET_CAD 0xC5
@@ -213,6 +215,7 @@
 #define MASK_RANGINGMUXSEL 0xCF
 
 #define RANGING_SLAVE 0x00
+#define RANGING_ADVANCED 0x00
 #define RANGING_MASTER 0x01
 
 //*************************************************************
@@ -389,6 +392,10 @@
 const uint16_t RNG_CALIB_0400[] = {10260, 10244, 10228, 10212, 10196, 10180}; // SF5 to SF10
 const uint16_t RNG_CALIB_0800[] = {11380, 11370, 11360, 11350, 11340, 11330};
 const uint16_t RNG_CALIB_1600[] = {13100, 13160, 13220, 13280, 13340, 13400};
+
+const double RNG_FGRAD_0400[] = {-0.148, -0.214, -0.419, -0.853, -1.686, -3.423};
+const double RNG_FGRAD_0800[] = {-0.041, -0.811, -0.218, -0.429, -0.853, -1.737};
+const double RNG_FGRAD_1600[] = {0.103, -0.041, -0.101, -0.211, -0.424, -0.87};
 
 // Channel of LoRa 2.4 G (there is no channel zero., just dummy value)
 const double CH_freq[] = {0E6,

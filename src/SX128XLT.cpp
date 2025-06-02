@@ -3188,6 +3188,18 @@ void SX128XLT::setRangingRole(uint8_t role)
   writeCommand(RADIO_SET_RANGING_ROLE, buffer, 1);
 }
 
+void SX128XLT::setAdvancedRanging(uint8_t status)
+{
+#ifdef SX128XDEBUG
+  Serial.println(F("setAdvancedRanging()"));
+#endif
+
+  uint8_t buffer[1];
+
+  buffer[0] = status;
+  writeCommand(RADIO_SET_ADVANCED_RANGING, buffer, 1);
+}
+
 uint32_t SX128XLT::getRangingResultRegValue(uint8_t resultType)
 {
   uint32_t valLsb = 0;
@@ -3355,6 +3367,34 @@ uint8_t SX128XLT::receiveRanging(uint32_t address, uint8_t bits, uint16_t timeou
   }
 }
 
+uint8_t SX128XLT::receiveAdvancedRanging(uint16_t timeout, bool wait)
+{
+#ifdef SX128XDEBUG
+  Serial.println(F("receiveAdvancedRanging()"));
+#endif
+
+  uint32_t TimeOut = millis() + timeout;
+
+  setAdvancedRanging(1); // Activate the advanced ranging mode
+
+  setDioIrqParams(IRQ_RADIO_ALL, IRQ_ADVANCED_RANGING_DONE, 0, 0);
+  setRx(0xFFFF);
+
+  if (!wait)
+  {
+    return NO_WAIT; // no wait
+  }
+
+  while (!digitalRead(_RXDonePin) && TimeOut > millis())
+    ;
+
+  setMode(MODE_STDBY_RC); // ensure to stop further packet reception
+
+  setAdvancedRanging(0); // De-activate the advanced ranging mode
+
+  return 0;
+}
+
 uint16_t SX128XLT::lookupCalibrationValue(uint8_t spreadingfactor, uint8_t bandwidth)
 {
   // this looks up the calibration value from the table in SX128XLT_Definitions.hifdef SX128XDEBUG
@@ -3381,6 +3421,32 @@ uint16_t SX128XLT::lookupCalibrationValue(uint8_t spreadingfactor, uint8_t bandw
   }
 }
 
+float SX128XLT::lookupFeiFactor(uint8_t spreadingfactor, uint8_t bandwidth)
+{
+  // this looks up the FEI gradient value from the table in AN1200.50 Rev 1.1 June 2022 Page 17
+#ifdef SX128XDEBUG
+  Serial.println(F("lookupFeiFactor()"));
+#endif
+
+  switch (bandwidth)
+  {
+  case LORA_BW_0400:
+    savedFreqGrad = RNG_FGRAD_0400[(spreadingfactor >> 4) - 5];
+    return savedFreqGrad;
+
+  case LORA_BW_0800:
+    savedFreqGrad = RNG_FGRAD_0800[(spreadingfactor >> 4) - 5];
+    return savedFreqGrad;
+
+  case LORA_BW_1600:
+    savedFreqGrad = RNG_FGRAD_1600[(spreadingfactor >> 4) - 5];
+    return savedFreqGrad;
+
+  default:
+    return 0x0000;
+  }
+}
+
 uint16_t SX128XLT::getSetCalibrationValue()
 {
 #ifdef SX128XDEBUG
@@ -3395,7 +3461,6 @@ int16_t SX128XLT::getRangingRSSI()
   // Added November 2021 - see datasheet SX1280-1_V3.2, 14.5.3 Ranging RSSI
   int16_t regdata;
   regdata = readRegister(REG_RANGING_RSSI);
-  regdata = regdata - 150;
   return regdata;
 }
 
