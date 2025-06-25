@@ -3748,13 +3748,7 @@ uint8_t SX128XLT::receiveReliable(uint8_t *rxbuffer, uint8_t size, uint16_t netw
   Serial.println(_ReliableConfig, HEX);
 #endif
 
-  uint16_t payloadcrc = 0, RXcrc, RXnetworkID = 0;
-  uint8_t regdataL, regdataH;
-  uint8_t index;
-  uint8_t buffer[2];
-
   _ReliableErrors = 0;
-  _ReliableFlags = 0;
 
   if (size > 251)
   {
@@ -3772,7 +3766,21 @@ uint8_t SX128XLT::receiveReliable(uint8_t *rxbuffer, uint8_t size, uint16_t netw
   }
 
   while (!digitalRead(_RXDonePin))
-    ;                     // Wait for DIO1 to go high
+    ; // Wait for DIO1 to go high
+
+  uint8_t status = receivedReliable_handler(rxbuffer, size, networkID);
+  return status;
+}
+
+uint8_t SX128XLT::receivedReliable_handler(uint8_t *rxbuffer, uint8_t size, uint16_t networkID)
+{
+
+  uint16_t payloadcrc = 0, RXcrc, RXnetworkID = 0;
+  uint8_t regdataL, regdataH;
+  uint8_t index;
+  uint8_t buffer[2];
+  _ReliableFlags = 0;
+
   setMode(MODE_STDBY_RC); // ensure to stop further packet reception
 
   if (readIrqStatus() & (IRQ_HEADER_ERROR + IRQ_CRC_ERROR + IRQ_RX_TX_TIMEOUT + IRQ_SYNCWORD_ERROR))
@@ -4100,12 +4108,7 @@ uint8_t SX128XLT::receiveReliableAutoACK(uint8_t *rxbuffer, uint8_t size, uint16
   Serial.println(_ReliableConfig, HEX);
 #endif
 
-  uint16_t payloadcrc = 0, RXcrc, RXnetworkID = 0;
-  uint8_t regdataL, regdataH, index;
-  uint8_t buffer[2];
-
   _ReliableErrors = 0;
-  _ReliableFlags = 0;
 
   if (size > 251)
   {
@@ -4123,7 +4126,18 @@ uint8_t SX128XLT::receiveReliableAutoACK(uint8_t *rxbuffer, uint8_t size, uint16
   }
 
   while (!digitalRead(_RXDonePin))
-    ;                     // Wait for DIO1 to go high
+    ; // Wait for DIO1 to go high
+  uint8_t status = receivedReliableAutoACK_handler(rxbuffer, size, networkID, ackdelay, txpower);
+  return status;
+}
+
+uint8_t SX128XLT::receivedReliableAutoACK_handler(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint32_t ackdelay, int8_t txpower)
+{
+  uint16_t payloadcrc = 0, RXcrc, RXnetworkID = 0;
+  uint8_t regdataL, regdataH, index;
+  uint8_t buffer[2];
+  _ReliableFlags = 0;
+
   setMode(MODE_STDBY_RC); // ensure to stop further packet reception
 
   if (readIrqStatus() & (IRQ_HEADER_ERROR + IRQ_CRC_ERROR + IRQ_RX_TX_TIMEOUT + IRQ_SYNCWORD_ERROR))
@@ -4551,12 +4565,7 @@ uint8_t SX128XLT::receiveReliable_addr(uint8_t *rxbuffer, uint8_t size, uint16_t
   Serial.println(_ReliableConfig, HEX);
 #endif
 
-  uint16_t payloadcrc = 0, RXcrc, RXnetworkID, RXdestAddr, RXsrcAddr;
-  uint8_t regdataL, regdataH, index;
-  uint8_t buffer[2];
-
   _ReliableErrors = 0;
-  _ReliableFlags = 0;
 
   if (size > 247)
   {
@@ -4575,6 +4584,20 @@ uint8_t SX128XLT::receiveReliable_addr(uint8_t *rxbuffer, uint8_t size, uint16_t
 
   while (!digitalRead(_RXDonePin))
     ; // Wait for packet
+
+  uint8_t status = receivedReliable_addr_handler(rxbuffer, size, networkID, destAddr, srcAddr);
+  return status;
+}
+
+uint8_t SX128XLT::receivedReliable_addr_handler(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint16_t *srcAddr)
+{
+  uint16_t payloadcrc = 0, RXcrc, RXnetworkID, RXdestAddr, RXsrcAddr;
+  uint8_t regdataL, regdataH, index;
+  uint8_t buffer[2];
+
+  _ReliableErrors = 0;
+  _ReliableFlags = 0;
+
   setMode(MODE_STDBY_RC);
 
   if (readIrqStatus() & (IRQ_HEADER_ERROR + IRQ_CRC_ERROR + IRQ_RX_TX_TIMEOUT + IRQ_SYNCWORD_ERROR))
@@ -4675,12 +4698,7 @@ uint8_t SX128XLT::receiveReliableAutoACK_addr(uint8_t *rxbuffer, uint8_t size, u
   Serial.println(_ReliableConfig, HEX);
 #endif
 
-  uint16_t payloadcrc = 0, RXcrc, RXnetworkID, RXdestAddr, RXsrcAddr;
-  uint8_t regdataL, regdataH, index;
-  uint8_t buffer[2];
-
   _ReliableErrors = 0;
-  _ReliableFlags = 0;
 
   if (size > 247)
   {
@@ -4699,6 +4717,20 @@ uint8_t SX128XLT::receiveReliableAutoACK_addr(uint8_t *rxbuffer, uint8_t size, u
 
   while (!digitalRead(_RXDonePin))
     ; // Wait for packet
+
+  uint8_t status = receivedReliableAutoACK_addr_handler(rxbuffer, size, networkID, destAddr, ackdelay, txpower, srcAddr);
+  return status;
+}
+
+uint8_t SX128XLT::receivedReliableAutoACK_addr_handler(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint32_t ackdelay, int8_t txpower, uint16_t *srcAddr)
+{
+  uint16_t payloadcrc = 0, RXcrc, RXnetworkID, RXdestAddr, RXsrcAddr;
+  uint8_t regdataL, regdataH, index;
+  uint8_t buffer[2];
+
+  _ReliableErrors = 0;
+  _ReliableFlags = 0;
+
   setMode(MODE_STDBY_RC);
 
   if (readIrqStatus() & (IRQ_HEADER_ERROR + IRQ_CRC_ERROR + IRQ_RX_TX_TIMEOUT + IRQ_SYNCWORD_ERROR))

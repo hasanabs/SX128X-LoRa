@@ -156,14 +156,19 @@ public:
   //*******************************************************************************
   uint8_t transmitReliable(uint8_t *txbuffer, uint8_t size, uint16_t networkID, uint32_t txtimeout, int8_t txpower, uint8_t wait);
   uint8_t receiveReliable(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint32_t rxtimeout, uint8_t wait);
+  uint8_t receivedReliable_handler(uint8_t *rxbuffer, uint8_t size, uint16_t networkID);
 
   uint8_t transmitReliableAutoACK(uint8_t *txbuffer, uint8_t size, uint16_t networkID, uint32_t acktimeout, uint32_t txtimeout, int8_t txpower, uint8_t wait);
   uint8_t receiveReliableAutoACK(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint32_t ackdelay, int8_t txpower, uint32_t rxtimeout, uint8_t wait);
+  uint8_t receivedReliableAutoACK_handler(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint32_t ackdelay, int8_t txpower);
 
   uint8_t transmitReliable_addr(uint8_t *txbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint16_t srcAddr, uint32_t txtimeout, int8_t txpower, uint8_t wait);
   uint8_t receiveReliable_addr(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint32_t rxtimeout, uint8_t wait, uint16_t *srcAddr = nullptr);
+  uint8_t receivedReliable_addr_handler(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint16_t *srcAddr = nullptr);
+
   uint8_t transmitReliableAutoACK_addr(uint8_t *txbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint16_t srcAddr, uint32_t acktimeout, uint32_t txtimeout, int8_t txpower, uint8_t wait);
   uint8_t receiveReliableAutoACK_addr(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint32_t ackdelay, int8_t txpower, uint32_t rxtimeout, uint8_t wait, uint16_t *srcAddr = nullptr);
+  uint8_t receivedReliableAutoACK_addr_handler(uint8_t *rxbuffer, uint8_t size, uint16_t networkID, uint16_t destAddr, uint32_t ackdelay, int8_t txpower, uint16_t *srcAddr = nullptr);
 
   uint8_t sendReliableACK(uint16_t networkID, uint16_t payloadcrc, int8_t txpower);
   uint8_t sendReliableACK(uint8_t *txbuffer, uint8_t size, uint16_t networkID, uint16_t payloadcrc, int8_t txpower);
