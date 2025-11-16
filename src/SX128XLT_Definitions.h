@@ -56,7 +56,6 @@
 #define LORA_IQ_INVERTED 0x00
 
 #define FREQ_STEP 198.364
-#define FREQ_ERROR_CORRECTION 1.55
 
 //*************************************************************
 // SX1280 Interrupt flags
@@ -399,48 +398,47 @@ const double RNG_FGRAD_1600[] = {0.103, -0.041, -0.101, -0.211, -0.424, -0.87};
 
 // Channel following BLE order
 const double CH_freq[] = {
-  2404E6,  // CH0
-  2406E6,  // CH1
-  2408E6,  // CH2
-  2410E6,  // CH3
-  2412E6,  // CH4
-  2414E6,  // CH5
-  2416E6,  // CH6
-  2418E6,  // CH7
-  2420E6,  // CH8
-  2422E6,  // CH9
-  2424E6,  // CH10
-  2428E6,  // CH11
-  2430E6,  // CH12
-  2432E6,  // CH13
-  2434E6,  // CH14
-  2436E6,  // CH15
-  2438E6,  // CH16
-  2440E6,  // CH17
-  2442E6,  // CH18
-  2444E6,  // CH19
-  2446E6,  // CH20
-  2448E6,  // CH21
-  2450E6,  // CH22
-  2452E6,  // CH23
-  2454E6,  // CH24
-  2456E6,  // CH25
-  2458E6,  // CH26
-  2460E6,  // CH27
-  2462E6,  // CH28
-  2464E6,  // CH29
-  2466E6,  // CH30
-  2468E6,  // CH31
-  2470E6,  // CH32
-  2472E6,  // CH33
-  2474E6,  // CH34
-  2476E6,  // CH35
-  2478E6,  // CH36
-  2402E6,  // CH37 - Adv
-  2426E6,  // CH38 - Adv
-  2480E6   // CH39 - Adv
+    2404E6, // CH0
+    2406E6, // CH1
+    2408E6, // CH2
+    2410E6, // CH3
+    2412E6, // CH4
+    2414E6, // CH5
+    2416E6, // CH6
+    2418E6, // CH7
+    2420E6, // CH8
+    2422E6, // CH9
+    2424E6, // CH10
+    2428E6, // CH11
+    2430E6, // CH12
+    2432E6, // CH13
+    2434E6, // CH14
+    2436E6, // CH15
+    2438E6, // CH16
+    2440E6, // CH17
+    2442E6, // CH18
+    2444E6, // CH19
+    2446E6, // CH20
+    2448E6, // CH21
+    2450E6, // CH22
+    2452E6, // CH23
+    2454E6, // CH24
+    2456E6, // CH25
+    2458E6, // CH26
+    2460E6, // CH27
+    2462E6, // CH28
+    2464E6, // CH29
+    2466E6, // CH30
+    2468E6, // CH31
+    2470E6, // CH32
+    2472E6, // CH33
+    2474E6, // CH34
+    2476E6, // CH35
+    2478E6, // CH36
+    2402E6, // CH37 - Adv
+    2426E6, // CH38 - Adv
+    2480E6  // CH39 - Adv
 };
-
 
 // These are the bit numbers which when set indicate reliable errors, variable _ReliableErrors
 #define ReliableCRCError 0x00     // bit number set in _ReliableErrors when there is a reliable CRC missmatch

@@ -2170,12 +2170,11 @@ int32_t SX128XLT::getFrequencyErrorHz()
 
   int32_t error, regvalue;
   uint32_t bandwidth;
-  float divider;
 
-  bandwidth = returnBandwidth(savedModParam2); // gets the last configured bandwidth
-  divider = (float)1625000 / bandwidth;        // data sheet says 1600000, but bandwidth is 1625000
+  bandwidth = returnBandwidth(savedModParam2); // gets the last configured bandwidth (Hz)
+  float bw_khz = bandwidth / 1000.0f;
   regvalue = getFrequencyErrorRegValue();
-  error = (FREQ_ERROR_CORRECTION * regvalue) / divider;
+  error = (int32_t)(regvalue * 1.55f * (bw_khz / 1600.0f));
 
   return error;
 }
